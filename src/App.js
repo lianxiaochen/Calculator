@@ -9,7 +9,8 @@ export const ACTIONS = {
   DELETE_DIGIT: "delete_digit",
   CHOOSE_OPERATION: "choose_operation",
   CLEAR: "clear",
-  EVALUATE: "evaluate"
+  EVALUATE: "evaluate",
+  PERCENT: "percent"
 }
 
 function reducer(state, { type, payload }) {
@@ -43,7 +44,7 @@ function reducer(state, { type, payload }) {
     
 
     case ACTIONS.CHOOSE_OPERATION:
-      if (state.overwrite) {
+      if (state.overwrite && payload.operation !== "1/x") {
         return {
           previousOperand: state.currentOperand,
           currentOperand: "0",
@@ -51,7 +52,7 @@ function reducer(state, { type, payload }) {
           overwrite: false
         }
       }
-      if (state.previousOperand == null) {
+      if (state.previousOperand == null && payload.operation !== "1/x") {
         return {
           ...state,
           operation: payload.operation,
@@ -60,10 +61,18 @@ function reducer(state, { type, payload }) {
         }
       }
       
-      if (payload.operation != null && state.currentOperand === "0") {
+      if (payload.operation != null && payload.operation !== "1/x" && state.currentOperand === "0") {
         return {
           ...state,
           operation: payload.operation
+        }
+      }
+
+      if (payload.operation === "1/x") {
+        const reciprocal = parseFloat(state.currentOperand);
+        return {
+          ...state,
+          currentOperand: (1 / reciprocal).toString()
         }
       }
 
@@ -113,12 +122,13 @@ function reducer(state, { type, payload }) {
         currentOperand: state.currentOperand.slice(0, -1)
       }
 
+
     default:
       break;
   }
 }
 
-function evaluate({ currentOperand, previousOperand, operation, overwrite }) {
+function evaluate({ currentOperand, previousOperand, operation }) {
   const past = parseFloat(previousOperand)
   const now = parseFloat(currentOperand)
   let computation = ""
@@ -127,10 +137,10 @@ function evaluate({ currentOperand, previousOperand, operation, overwrite }) {
     case "+":
       computation = past + now;
       break;
-    case "-":
+    case "−":
       computation = past - now;
       break;
-    case "*":
+    case "×":
       computation = past * now;
       break;
     case "÷":
@@ -164,21 +174,22 @@ function App() {
       <button className="span-two" onClick={() => dispatch({ type: ACTIONS.CLEAR })}>AC</button>
       <button onClick={() => dispatch({ type: ACTIONS.DELETE_DIGIT })}>DEL</button>
       <OperationButton operation="÷" dispatch={dispatch} />
-      <DigitButton digit="1" dispatch={dispatch} />
-      <DigitButton digit="2" dispatch={dispatch} />
-      <DigitButton digit="3" dispatch={dispatch} />
-      <OperationButton operation="*" dispatch={dispatch} />
+      <DigitButton digit="7" dispatch={dispatch} />
+      <DigitButton digit="8" dispatch={dispatch} />
+      <DigitButton digit="9" dispatch={dispatch} />
+      <OperationButton operation="×" dispatch={dispatch} />
       <DigitButton digit="4" dispatch={dispatch} />
       <DigitButton digit="5" dispatch={dispatch} />
       <DigitButton digit="6" dispatch={dispatch} />
       <OperationButton operation="+" dispatch={dispatch} />
-      <DigitButton digit="7" dispatch={dispatch} />
-      <DigitButton digit="8" dispatch={dispatch} />
-      <DigitButton digit="9" dispatch={dispatch} />
-      <OperationButton operation="-" dispatch={dispatch} />
+      <DigitButton digit="1" dispatch={dispatch} />
+      <DigitButton digit="2" dispatch={dispatch} />
+      <DigitButton digit="3" dispatch={dispatch} />
+      <OperationButton operation="−" dispatch={dispatch} />
+      <OperationButton operation="1/x" dispatch={dispatch} />
+      <DigitButton digit="0" dispatch={dispatch} />
       <DigitButton digit="." dispatch={dispatch} />
-      <DigitButton digit="000" dispatch={dispatch} />
-      <button className="span-two" onClick={() => dispatch({ type: ACTIONS.EVALUATE })}>=</button>
+      <button onClick={() => dispatch({ type: ACTIONS.EVALUATE })}>=</button>
    
     
     </div>
