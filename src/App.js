@@ -1,4 +1,4 @@
-import { useReducer } from "react";
+import { useEffect, useReducer } from "react";
 import DigitButton from "./DigitButton";
 import OperationButton from "./OperationButton";
 import "./App.css";
@@ -31,7 +31,7 @@ function reducer(state, { type, payload }) {
       if (payload.digit !== "0" && payload.digit !== "." && state.currentOperand === "0") 
         return {
           ...state,
-        currentOperand: `${payload.digit}`
+          currentOperand: `${payload.digit}`
         }
       return {
         ...state,
@@ -163,7 +163,55 @@ function formatOperand(operand) {
 }
 
 
+
+
+
+
 function App() {
+
+  useEffect(() => {
+    document.addEventListener("keydown", function (e) {
+      const numberAllowed = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "."]
+      const operationAllowed = ["+", "-", "*", "/", "Enter", "Escape"]
+      const otherAllowed = ["Backspace"]
+      
+      if (numberAllowed.includes(e.key)) {
+        dispatch({ type: ACTIONS.ADD_DIGIT, payload: { digit: e.key } })
+      }
+
+      if (operationAllowed.includes(e.key)) {
+        switch (e.key) {
+          case "+":
+            dispatch({ type: ACTIONS.CHOOSE_OPERATION, payload: { operation: "+" } })
+            break;
+          case "-":
+            dispatch({ type: ACTIONS.CHOOSE_OPERATION, payload: { operation: "−" } })
+            break;
+          case "*":
+            dispatch({ type: ACTIONS.CHOOSE_OPERATION, payload: { operation: "×" } })
+            break;
+          case "/":
+            dispatch({ type: ACTIONS.CHOOSE_OPERATION, payload: { operation: "÷" } })
+            break;
+          case "Enter":
+            dispatch({ type: ACTIONS.EVALUATE })
+            break;
+          case "Escape":
+            dispatch({ type: ACTIONS.CLEAR })
+            break;
+          default:
+            break;
+        }
+      }
+
+      if (otherAllowed.includes(e.key)) {
+        dispatch({ type: ACTIONS.DELETE_DIGIT})
+      }
+      
+    })
+  }, []);
+
+
   const [{ currentOperand, previousOperand, operation }, dispatch] = useReducer(reducer, {currentOperand: "0"});
   return (
     <div className="calculator-grid">
